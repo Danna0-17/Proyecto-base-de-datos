@@ -1,4 +1,5 @@
 
+import os
 import requests
 import pandas as pd
 import re
@@ -6,13 +7,9 @@ import time
 
 API = "http://104.225.223.220:8003"
 
-todos = []
-
-for offset in range(0, 500, 100):
-    url = f"{API}/api/usuarios?limit=100&offset={offset}"
-    r = requests.get(url)
-    data = r.json()["data"]
-    todos.extend(data)
+url = f"{API}/api/usuarios/random?cantidad=500"
+r = requests.get(url)
+todos = r.json()["data"]
 
 df_usuarios = pd.DataFrame(todos)
 #se crea el dataframe de los 500 usuarios
@@ -318,5 +315,6 @@ normalizar_nombre()
 normalizar_apellido()
 normalizar_ciudad()
 
+os.makedirs("csv", exist_ok=True)
 df_final.to_csv("csv/usuarios_completos1.csv", index=False)
 print("\nArchivo guardado: usuarios_completos.csv")
