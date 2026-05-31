@@ -148,4 +148,4 @@ for descripcion, query in checks:
 
 cur.close()
 db.close()
-print("\n¡Listo! Revisa las tablas en Supabase")
+print("\nListo")

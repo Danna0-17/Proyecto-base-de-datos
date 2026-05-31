@@ -420,3 +420,39 @@ print(f"\nDetalles obtenidos: {len(df_detalles)}")
 
 df_detalles.to_csv("csv/detalle_pedido.csv", index=False)
 print("\nArchivo guardado: csv/detalle_pedido.csv")
+
+
+
+
+
+
+"""
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++++++   PRODUCTOS   ++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+"""
+
+
+
+r = requests.get(f"{API}productos?limit=120&offset=0")
+df_productos = pd.DataFrame(r.json()["data"])
+df_productos.to_csv("csv/productos.csv", index=False)
+print(f"Productos obtenidos: {len(df_productos)}")
+
+
+
+
+
+
+"""
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++   CATEGORIAS   ++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+"""
+
+
+
+r = requests.get(f"{API}categorias?limit=15&offset=0")
+df_categorias = pd.DataFrame(r.json()["data"])
+df_categorias.to_csv("csv/categorias.csv", index=False)
+print(f"Categorías obtenidas: {len(df_categorias)}")
