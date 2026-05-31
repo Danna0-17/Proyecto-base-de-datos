@@ -75,7 +75,7 @@ db.commit()
 print("Tablas creadas")
 
 # ── CARGAR CSVs ────────────────────────────────────────────────────────
-df_usuarios   = pd.read_csv("csv/usuarios_completos1.csv")
+df_usuarios   = pd.read_csv("csv/usuarios.csv")
 df_pedidos    = pd.read_csv("csv/pedidos.csv")
 df_detalle    = pd.read_csv("csv/detalle_pedido.csv")
 df_productos  = pd.read_csv("csv/productos.csv")

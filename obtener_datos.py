@@ -1,18 +1,28 @@
-
 import os
 import requests
 import pandas as pd
 import re
 import time
 
-API = "http://104.225.223.220:8003"
+max_datos = 500
 
-url = f"{API}/api/usuarios/random?cantidad=500"
-r = requests.get(url)
+API = "http://104.225.223.220:8003/api/"
+
+r = requests.get(f"{API}usuarios/random?cantidad={max_datos}")
 todos = r.json()["data"]
 
 df_usuarios = pd.DataFrame(todos)
 #se crea el dataframe de los 500 usuarios
+
+
+
+"""
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++   USUARIOS   ++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+"""
+
+
 
 print(f"Usuarios descargados: {len(df_usuarios)}")
 print("Campos vacíos por columna:")
@@ -31,7 +41,6 @@ print(f"Usuarios con al menos un campo vacío: {len(ids_incompletos)}")
 
 
 # Obtener los datos de las llamadas
-
 def parsear_transcripcion(texto: str) -> dict:
     """
     Extrae los datos de la llamada.
@@ -158,7 +167,7 @@ print(f"\nConsultando /api/llamadas/usuario/{{id}} para {len(ids_incompletos)} u
 
 for idx, uid in enumerate(ids_incompletos): 
     try:
-        resp = requests.get(f"{API}/api/llamadas/usuario/{uid}", timeout=10)
+        resp = requests.get(f"{API}llamadas/usuario/{uid}", timeout=10)
         resp.raise_for_status()
         payload = resp.json()
     except Exception as e:
@@ -316,5 +325,98 @@ normalizar_apellido()
 normalizar_ciudad()
 
 os.makedirs("csv", exist_ok=True)
-df_final.to_csv("csv/usuarios_completos1.csv", index=False)
-print("\nArchivo guardado: usuarios_completos.csv")
+df_final.to_csv("csv/usuarios.csv", index=False)
+print("\nArchivo guardado: usuarios.csv")
+
+
+
+
+
+
+"""
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++   PEDIDOS   +++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+"""
+
+
+
+ids_todos      = df_final["usuario_id"].tolist()
+pedidos_por_usuario = 2 # 2 pedidos por usuario
+
+print(f"\nConsultando pedidos para {len(ids_todos)} usuarios ({pedidos_por_usuario} pedidos por usuario)...")
+
+todos_los_pedidos = []
+
+for idx, uid in enumerate(ids_todos):
+    if len(todos_los_pedidos) >= max_datos:
+        break
+
+    try:
+        url = f"{API}pedidos/usuario/{uid}?limit={pedidos_por_usuario}"
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+        pedidos = resp.json().get("data", [])
+    except Exception as e:
+        print(f"  Error en usuario {uid}: {e}")
+        continue
+
+    todos_los_pedidos.extend(pedidos)
+
+    if idx % 50 == 0:
+        print(f"  Procesados: {idx}/{len(ids_todos)} — Pedidos acumulados: {len(todos_los_pedidos)}")
+        time.sleep(0.2)
+
+# Recortar exactamente a 500 por si el último usuario empujó por encima
+df_pedidos = pd.DataFrame(todos_los_pedidos[:max_datos])
+
+print(f"\nPedidos obtenidos: {len(df_pedidos)}")
+
+df_pedidos.to_csv("csv/pedidos.csv", index=False)
+print("\nArchivo guardado: csv/pedidos.csv")
+
+
+
+
+
+
+"""
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++++++++++++++++++++   DETALLES PEDIDOS   +++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+"""
+
+
+
+ids_pedidos = df_pedidos["pedido_id"].tolist()
+max_det_pedido = 2
+
+print(f"\nConsultando detalles para {len(ids_pedidos)} pedidos (máx. {max_det_pedido} por pedido, tope {max_datos})...")
+
+todos_los_detalles = []
+
+for idx, pid in enumerate(ids_pedidos):
+    if len(todos_los_detalles) >= max_datos:
+        break
+
+    try:
+        url = f"{API}detalle_pedido/pedido/{pid}"
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+        detalles = resp.json().get("data", [])
+    except Exception as e:
+        print(f"  Error en pedido {pid}: {e}")
+        continue
+
+    todos_los_detalles.extend(detalles)
+
+    if idx % 50 == 0:
+        print(f"  Procesados: {idx}/{len(ids_pedidos)} — Detalles acumulados: {len(todos_los_detalles)}")
+        time.sleep(0.2)
+
+df_detalles = pd.DataFrame(todos_los_detalles[:max_datos])
+
+print(f"\nDetalles obtenidos: {len(df_detalles)}")
+
+df_detalles.to_csv("csv/detalle_pedido.csv", index=False)
+print("\nArchivo guardado: csv/detalle_pedido.csv")
