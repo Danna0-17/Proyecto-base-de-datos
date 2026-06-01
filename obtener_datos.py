@@ -12,6 +12,7 @@ r = requests.get(f"{API}usuarios/random?cantidad={max_datos}")
 todos = r.json()["data"]
 
 df_usuarios = pd.DataFrame(todos)
+
 #se crea el dataframe de los 500 usuarios
 
 
@@ -374,9 +375,6 @@ print(f"\nPedidos obtenidos: {len(df_pedidos)}")
 
 df_pedidos.to_csv("csv/pedidos.csv", index=False)
 print("\nArchivo guardado: csv/pedidos.csv")
-
-
-
 
 
 
