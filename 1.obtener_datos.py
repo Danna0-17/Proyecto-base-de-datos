@@ -341,7 +341,7 @@ print("\nArchivo guardado: usuarios.csv")
 
 
 
-ids_todos      = df_final["usuario_id"].tolist()
+ids_todos = df_final["usuario_id"].tolist()
 pedidos_por_usuario = 2 # 2 pedidos por usuario
 
 print(f"\nConsultando pedidos para {len(ids_todos)} usuarios ({pedidos_por_usuario} pedidos por usuario)...")
